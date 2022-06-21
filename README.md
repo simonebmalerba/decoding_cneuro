@@ -1,4 +1,5 @@
 # decoding_cneuro
+<<<<<<< HEAD
 
 This code base is using the Julia Language and [DrWatson](https://juliadynamics.github.io/DrWatson.jl/stable/)
 to make a reproducible scientific project named
@@ -20,3 +21,5 @@ To (locally) reproduce this project, do the following:
 
 This will install all necessary packages for you to be able to run the scripts and
 everything should work out of the box.
+=======
+>>>>>>> 44e52755ca7501c94675792aa980eacee4b28ea9
