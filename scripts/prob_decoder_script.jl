@@ -21,6 +21,7 @@ function prob_decoder(N::Int,σi; MaxEpochs=2000,nets=8,bs=50,opt=ADAM)
     @info N,P,σi
     for n = 1:nets
         pdecD = Dict()
+        #Generate data
         V = mvn_sample(K,N);
         V_m = V[:,end-M+1:end] 
         idx_trn = rand(1:length(x_samples),P)
@@ -31,6 +32,7 @@ function prob_decoder(N::Int,σi; MaxEpochs=2000,nets=8,bs=50,opt=ADAM)
         R_tst = V[:,idx_tst] + sqrt(η)*randn(N,n_tst)
         #Format data for probabilistic_decoder
         data,x_m = one_hotdataset(x_trn,x_tst,R_trn,R_tst,M,bs=bs)
+        #Train decoder and computes ideal error
         p_dec, history = train_prob_decoder(data,x_m,x_tst,M=M,
             epochs=MaxEpochs,opt= opt)
         ε_id = mse_ideal(V_m,η,x_m,R_tst,x_tst')
@@ -40,37 +42,33 @@ function prob_decoder(N::Int,σi; MaxEpochs=2000,nets=8,bs=50,opt=ADAM)
         pdecD[:history] = history
         pdecD[:tc] = V_m
         pdecDicts[:($n)] = pdecD
+        @info "Finished" n "with parameters" N σi
     end
     return pdecDicts
 end
 ##
-#Dataset parameters
 nets =8   #Numbers of test networks
-#Sampling points & test points
-P_i= 2000
+#Dataset parameters
+P_i= 2000  #How many I can sample from (not so important)
 n_tst = Int.(1e5)
-#P/datapoints
-γ = 3
-
-## Network parameters
-σVec = (10:30:55)/500
+γ = 3 #Parameter/datapoint ratio
+x_samples = sort((rand(Float32,P_i).-0.5f0))
+#Ideal decoder parameters
+M= 500
+bin = range(-0.5,0.5,length=M+1)
+x_m = bin[1:end-1] .+ diff(bin)/2
+# Network parameters
+σVec = (5:7:54)/500
 NVec = 20:40:60
 k =SqExponentialKernel()
 η = 0.1
-M= 500
-#σi = 20/500
-
-
-x_samples = sort((rand(Float32,P_i).-0.5f0))
-bin = range(-0.5,0.5,length=M+1)
-x_m = bin[1:end-1] .+ diff(bin)/2
-
+## Run simulations
 pdec  = [prob_decoder(N,σi) for σi=σVec,N=NVec]
-
+#Save results
 ##
 Nmin,Nmax = first(NVec),last(NVec)
-name = savename("prob_dec" , (@dict Nmin Nmax η ),"jld2")
-data = Dict("NVec"=>NVec ,"σVec" => σVec,"γ"=>γ,"prob_decoder" => pdec)
+name = savename("prob_dec" , (@dict Nmin Nmax η γ),"jld2")
+data = Dict("NVec"=>NVec ,"σVec" => σVec,"prob_decoder" => pdec)
 safesave(datadir("sims/probabilistic_decoder",name) ,data)
 
 

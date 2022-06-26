@@ -27,7 +27,7 @@ function lower_bound(N,σi,P)
     return η_e,N_e
 end
 
-lbVec = [lower_bound(N,20/500,P) for P=2000:2000:6000, N= 30:20:110]
+#lbVec = [lower_bound(N,20/500,P) for P=2000:2000:6000, N= 30:20:110]
 
 function linear_decoder(N::Int,σi; nets = 8)
     lDicts = Dict()
@@ -80,8 +80,9 @@ n_tst = Int.(1e5)
 #σi = 30/500
 k = SqExponentialKernel()
 η = 0.1
+
+##Parameters of the ideal decoder
 M=500
-##
 bin = range(-0.5,0.5,length=M+1)
 x_m = bin[1:end-1] .+ diff(bin)/2
 ##
