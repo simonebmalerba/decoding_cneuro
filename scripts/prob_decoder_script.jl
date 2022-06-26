@@ -8,7 +8,7 @@ include(srcdir("kernel_utilities.jl"))
 include(srcdir("utils.jl"))
 include(srcdir("probabilistic_decoder.jl"))
 #include(srcdir("plot_utils.jl"))
-plotlyjs(size=(400,300))
+#plotlyjs(size=(400,300))
 ##
 
 ##
@@ -20,7 +20,7 @@ function prob_decoder(N::Int,σi; MaxEpochs=2000,nets=8,bs=50,opt=ADAM)
     #Parameters to datapoint ratio
     P = M*N*γ
     @info N,P,σi
-    for n = 1:nets
+    Threads.@threads for n = 1:nets
         pdecD = Dict()
         #Generate data
         V = mvn_sample(K,N);
@@ -43,7 +43,7 @@ function prob_decoder(N::Int,σi; MaxEpochs=2000,nets=8,bs=50,opt=ADAM)
         pdecD[:history] = history
         pdecD[:tc] = V_m
         pdecDicts[:($n)] = pdecD
-        @info "Finished" n "with parameters" N σi
+        @info "Finished" n "on thread" Threads.threadid()
     end
     return pdecDicts
 end
