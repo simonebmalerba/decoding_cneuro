@@ -1,6 +1,6 @@
 using DrWatson
 @quickactivate "decoding_cneuro"
-using Distributions,StatsBase , LinearAlgebra, MultivariateStats,Roots
+using Distributions, StatsBase , LinearAlgebra, MultivariateStats,Roots
 using KernelFunctions
 
 function rational_quadratic_normalizer(σVec,αVec,x_trn;N=500)

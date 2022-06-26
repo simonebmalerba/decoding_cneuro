@@ -2,12 +2,12 @@ using DrWatson
 @quickactivate "decoding_cneuro"
 #Strutcture and function for 1D model and ML-MSE inference
 #using TensorBoardLogger,Logging
-using Plots,LaTeXStrings,KernelFunctions, Roots
+#using Plots
 using JLD2
 include(srcdir("kernel_utilities.jl"))
 include(srcdir("utils.jl"))
 include(srcdir("probabilistic_decoder.jl"))
-include(srcdir("plot_utils.jl"))
+#include(srcdir("plot_utils.jl"))
 plotlyjs(size=(400,300))
 ##
 
