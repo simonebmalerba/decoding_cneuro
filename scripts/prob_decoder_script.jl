@@ -7,6 +7,7 @@ using JLD2
 include(srcdir("kernel_utilities.jl"))
 include(srcdir("utils.jl"))
 include(srcdir("probabilistic_decoder.jl"))
+include(srcdir("plot_utils.jl"))
 plotlyjs(size=(400,300))
 ##
 
@@ -59,7 +60,7 @@ bin = range(-0.5,0.5,length=M+1)
 x_m = bin[1:end-1] .+ diff(bin)/2
 # Network parameters
 σVec = (5:7:54)/500
-NVec = 20:40:60
+NVec = 20:20:100
 k =SqExponentialKernel()
 η = 0.1
 ## Run simulations
