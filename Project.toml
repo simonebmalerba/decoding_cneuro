@@ -1,6 +1,12 @@
 name = "decoding_cneuro"
 authors = ["simone"]
+
+[deps]
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
+DrWatson = "634d3b9d-ee7a-5ddf-bec9-22491ea816e1"
+Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
+KernelFunctions = "ec8451be-7e33-11e9-00cf-bbf324bd1392"
+Roots = "f2b01f46-fcfa-551c-844a-d8ac1e96c665"
+
 [compat]
 julia = "1.5.2"
-[deps]
-DrWatson = "634d3b9d-ee7a-5ddf-bec9-22491ea816e1"

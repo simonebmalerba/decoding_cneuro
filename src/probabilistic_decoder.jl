@@ -1,16 +1,16 @@
 using DrWatson
-@quickactivate "Random_coding"
+@quickactivate "decoding_cneuro"
 using Flux
 using Parameters: @with_kw
 using ProgressMeter: Progress, next!
-include(srcdir("network.jl"))
 
 @with_kw mutable struct TrainArgsProb
-    lr = 1e-2               # learning rate
+    lr = 1e-3              # learning rate
     epochs = 20             # number of epochs
     M = 500                 # latent dimension
     verbose_freq = 20       # logging for every verbose_freq iterations
     opt = ADAM             #Optimizer
+    min_diff = 1e-2 # Minimum difference for stopping criterium
 end
 
 function patience(predicate, wait)
@@ -85,12 +85,12 @@ function train_prob_decoder(data,x_m,x_tst; dec=nothing,kws...)
         :mse_tst =>Float32[])     
     trn_step =0
     #trigger for plateau of training error: difference from last ce_trn
-    #constantly below 1e-6 (in 5 epochs)
-    trigger = plateau(last, 5; init_score=0,min_dist=1e-6);
+    #constantly below 1e-3 (in 5 epochs)
+    trigger = plateau(last, 5; init_score=0,min_dist=args.min_diff);
     l_av = 0
+    progress = Progress(args.epochs)
     for epoch = 1:args.epochs
-        @info "Epoch $(epoch)"
-        progress = Progress(length(data_trn))
+        #@info "Epoch $(epoch)"
         for d in data_trn
             l, back = Flux.pullback(ps) do
                 x_entropy(dec,d...) 
@@ -99,12 +99,12 @@ function train_prob_decoder(data,x_m,x_tst; dec=nothing,kws...)
             l_av += l 
             grad = back(1f0)
             Flux.Optimise.update!(opt, ps, grad)
-            next!(progress; showvalues=[(:loss, l_av/trn_step),(:epoch,epoch)])
+            trn_step += 1
             if trn_step % args.verbose_freq == 0
                 push!(history[:ce_trn],l_av/trn_step)
             end
-            trn_step += 1
         end
+        next!(progress; showvalues=[(:loss, l_av/trn_step),(:epoch,epoch)])
         push!(history[:ce_tst],
             mean([x_entropy(dec,dtt...) for dtt in data_tst]))
         push!(history[:mse_tst],mse_prob(dec,data_tst,x_tst,x_m))
