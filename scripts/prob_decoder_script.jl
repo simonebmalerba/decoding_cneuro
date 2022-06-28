@@ -43,7 +43,7 @@ function prob_decoder(N::Int,σi; MaxEpochs=2000,nets=8,bs=50,opt=ADAM)
         pdecD[:history] = history
         pdecD[:tc] = V_m
         pdecDicts[:($n)] = pdecD
-        @info "Finished" n "on thread" Threads.threadid()
+        @info "Finished" n  Threads.threadid()
     end
     return pdecDicts
 end
@@ -59,7 +59,7 @@ M= 500
 bin = range(-0.5,0.5,length=M+1)
 x_m = bin[1:end-1] .+ diff(bin)/2
 # Network parameters
-σVec = (5:7:54)/500
+σVec = (5:8:54)/500
 NVec = 20:20:100
 k =SqExponentialKernel()
 η = 0.1
