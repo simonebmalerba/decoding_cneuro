@@ -1,12 +1,12 @@
 ##
 using DrWatson
 @quickactivate "decoding_cneuro"
-#Strutcture and function for 1D model and ML-MSE inference
 #using TensorBoardLogger,Logging
+#using Plots
 include(srcdir("kernel_utilities.jl"))
-include(srcdir("plot_utils.jl"))
+#include(srcdir("plot_utils.jl"))
 include(srcdir("utils.jl"))
-plotlyjs(size=(400,300))
+#plotlyjs(size=(400,300))
 ##
 #c = C(cgrad(:viridis),N)
 function lower_bound(N,σi,P)
@@ -30,17 +30,17 @@ end
 #lbVec = [lower_bound(N,20/500,P) for P=2000:2000:6000, N= 30:20:110]
 
 function linear_decoder(N::Int,σi; nets = 8)
-    lDicts = Dict()
     t = ScaleTransform(1/(sqrt(2)*σi))
     P = γ*N
-    @info N,P,σi
+    @info "Parameters" N,P,σi
     x_trn = sort((rand(Float32,P).-0.5f0))
     K_id = kernelmatrix(k,t(vcat(x_trn,x_m)))
     n_tste = Int(round(n_tst/P))
     idx_tst = repeat(1:P,n_tste)
     x_tst = repeat(x_trn,n_tste)
-    for n = 1:nets
-        lD = Dict()
+    lDicts = Dict("$n"=> Dict() for n=1:nets)
+    Threads.@threads for n = 1:nets
+        lD = lDicts["$n"]
         V = mvn_sample(K_id,N);
         V_m = V[:,end-M+1:end] 
         R_trn = V[:,1:P] + sqrt(η)*randn(N,P)
@@ -64,37 +64,34 @@ function linear_decoder(N::Int,σi; nets = 8)
         lD[:bias] = B
         lD[:V2] = V2
         lD[:f_av] = x_ext_av
-        lDicts[:($n)] = lD
+        lD[:lb] = lower_bound(N,σi,P)
+        @info "Finished on " Threads.threadid() ε_id ε
     end
-
-    lDicts[:lb] = lower_bound(N,σi,P)
     return lDicts
 end
 ##
-nets=8
+##
+nets =8   #Numbers of test networks
 #Dataset parameters
+#P= 2000  #How many I can sample from (not so important)
 n_tst = Int.(1e5)
-γ = 10
-#Network parameters
-#N = 100
-#σi = 30/500
-k = SqExponentialKernel()
-η = 0.1
-
-##Parameters of the ideal decoder
-M=500
+γ = 2 #Parameter/datapoint ratio
+#Ideal decoder parameters
+M= 500
 bin = range(-0.5,0.5,length=M+1)
 x_m = bin[1:end-1] .+ diff(bin)/2
 ##
-σVec = (5:10:55)/500
+σVec = (5:8:53)/500
 NVec = 60:20:200
+k =SqExponentialKernel()
+η = 0.1
 
-linDec = [linear_decoder(N,σi,nets=1) for σi = σVec, N=NVec]
-
-
+linDec = Dict((σi,N) => linear_decoder(N,σi) for σi = σVec,N=NVec)
+#gamma = γ
+#eta=η
 ##
 Nmin,Nmax = first(NVec),last(NVec)
 name = savename("lin_dec" , (@dict Nmin Nmax η γ),"jld2")
-data = Dict("NVec"=>NVec ,"σVec" => σVec,"linDec" => linDec)
+data = Dict("NVec"=>NVec,"σVec" => σVec,"linDec" => linDec)
 safesave(datadir("sims/linear_decoder",name) ,data)
 
