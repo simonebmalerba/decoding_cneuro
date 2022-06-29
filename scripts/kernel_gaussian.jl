@@ -27,9 +27,9 @@ function lower_bound(N,σi,P)
     return η_e,N_e
 end
 
-#lbVec = [lower_bound(N,20/500,P) for P=2000:2000:6000, N= 30:20:110]
+lbVec = lower_bound(2000,53/500,5*2000)
 
-function linear_decoder(N::Int,σi; nets = 8)
+#function linear_decoder(N::Int,σi; nets = 8)
     t = ScaleTransform(1/(sqrt(2)*σi))
     P = γ*N
     @info "Parameters" N,P,σi

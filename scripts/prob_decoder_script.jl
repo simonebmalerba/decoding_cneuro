@@ -20,8 +20,9 @@ function prob_decoder(N::Int,σi; MaxEpochs=2000,nets=8,bs=50,opt=ADAM)
     #Parameters to datapoint ratio
     P = M*N*γ
     @info N,P,σi
+    pdecDicts = Dict("$n"=> Dict() for n=1:nets)
     Threads.@threads for n = 1:nets
-        pdecD = Dict()
+        pdecD = pdecDicts["$n"]
         #Generate data
         V = mvn_sample(K,N);
         V_m = V[:,end-M+1:end] 
@@ -42,7 +43,6 @@ function prob_decoder(N::Int,σi; MaxEpochs=2000,nets=8,bs=50,opt=ADAM)
         pdecD[:prob_dec] = p_dec
         pdecD[:history] = history
         pdecD[:tc] = V_m
-        pdecDicts[:($n)] = pdecD
         @info "Finished" n  Threads.threadid()
     end
     return pdecDicts
@@ -62,13 +62,13 @@ x_m = bin[1:end-1] .+ diff(bin)/2
 σVec = (5:8:54)/500
 NVec = 20:20:100
 k =SqExponentialKernel()
-η = 0.1
+η = 0.3
 ## Run simulations
 pdec  = [prob_decoder(N,σi) for σi=σVec,N=NVec]
 #Save results
 ##
 Nmin,Nmax = first(NVec),last(NVec)
-name = savename("prob_dec" , (@dict Nmin Nmax η γ),"jld2")
+name = savename("prob_dec" , (@dict Nmin Nmax γ η),"jld2")
 data = Dict("NVec"=>NVec ,"σVec" => σVec,"prob_decoder" => pdec)
 safesave(datadir("sims/probabilistic_decoder",name) ,data)
 

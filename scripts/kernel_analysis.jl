@@ -8,7 +8,7 @@ include(srcdir("plot_utils.jl"))
 mydir= datadir("sims/linear_decoder")
 flnames = filter(x ->occursin(r"lin_dec",x),
     readdir(mydir))
-myf = flnames[2]
+myf = flnames[5]
 data = load(datadir(mydir,myf))
 γ_e = split(myf,('_'))[findfirst(occursin.("γ",split(myf,'_')))] 
 γ = eval.(Meta.parse.(γ_e))
@@ -46,16 +46,18 @@ safesave(plotsdir("lin_dec",name) ,p2)
 #plot(NVec,mean(ε_id)', xlabel=L"$\sigma$",ylabel = L"$\varepsilon^2$",
 #    markersize=6,yaxis=:log10,legend=:none,c=c1')
 p3 = plot(xlabel=L"$N$",ylabel = L"$\varepsilon(\sigma^*)$")
-ε = [[linDec[(σi,N)][String("$n")][:mse] for σi = σVec,N=NVec] for n=1:8]
-lb = mean([[/(linDec[(σi,N)][String("$n")][:lb]...) for σi = σVec,N=NVec]
-     for n=1:8])
+#ε = [[linDec[(σi,N)][String("$n")][:mse] for σi = σVec,N=NVec] for n=1:8]
+#lb = mean([[/(linDec[(σi,N)][String("$n")][:lb]...) for σi = σVec,N=NVec]
+#     for n=1:8])
 ##
 c2 = C(cgrad(:speed),5)
 εo = [findmin.(ε,dims=1)[n][1] for n=1:8]
 lbo = findmin(lb,dims=1)[1]
 εo_id = [findmin.(ε_id,dims=1)[n][1] for n=1:8]
+ε_id
 #σo = [[σVec[I[1]] for I  = findmin.(ε,dims=1)[n][2]] for n=1:8]
-scatter!(p3,NVec,mean(εo)',m=:o,markersize=6,c=c2[5])
+scatter!(p3,NVec,mean(εo)',m=:o,markersize=6,c=c2[3])
 plot!(p3,NVec,lbo',c=c2[5],label=L"$\gamma=20$")
+plot!(p3,NVec,mean(ε_id)[end,:])
 name = savename("e_optvsN_gamma2_20" , (@dict  η ),"svg")
 safesave(plotsdir("lin_dec",name) ,p3)
