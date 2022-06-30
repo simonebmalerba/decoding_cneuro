@@ -18,7 +18,7 @@ end
     verbose_freq = 10       # logging for every verbose_freq iterations
     opt = ADAM             #Optimizer
     f = relu               ##Specify non linearity
-    min_diff = 1e-6
+    min_diff = 1e-8
 end
 ##
 function patience(predicate, wait)
