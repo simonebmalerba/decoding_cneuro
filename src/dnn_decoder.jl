@@ -12,14 +12,38 @@ using ProgressMeter: Progress, next!
 end
 
 @with_kw mutable struct TrainArgsDnn
-    lr = 1e-3              # learning rate
+    lr = 1e-4              # learning rate
     epochs = 50             # number of epochs
     M = 500                 # latent dimension
     verbose_freq = 10       # logging for every verbose_freq iterations
     opt = ADAM             #Optimizer
     f = relu               ##Specify non linearity
+    min_diff = 1e-6
 end
 ##
+function patience(predicate, wait)
+    let count = 0
+      function on_trigger(args...; kwargs...)
+        count = predicate(args...; kwargs...) ? count + 1 : 0
+  
+        return count >= wait
+      end
+    end
+end
+
+function plateau(f, width; distance = -, init_score = 0, min_dist = 1f-6)
+    is_plateau = let last_score = init_score
+      (args...; kwargs...) -> begin
+        score = f(args...; kwargs...)
+        Δ = abs(distance(last_score, score))
+        last_score = score
+  
+        return Δ < min_dist
+      end
+    end
+  
+    return patience(is_plateau, width)
+end
 
 ## Mean squared error
 mse_loss(dec,r,x) = Flux.mse(dec(r) , x)
@@ -40,11 +64,10 @@ function train_dnn_dec(data; dec = nothing, kws...)
     #Save training history
     history = Dict(:mse_trn => Float32[],:mse_tst => Float32[],:ΔP => [])
     trn_step =0
+    trigger = plateau(last, 5; init_score=0,min_dist=args.min_diff);
+    l_av = 0
+    progress = Progress(args.epochs)
     for epoch = 1:args.epochs
-        @info "Epoch $(epoch)"
-        progress = Progress(length(data_trn))
-        l_av = 0
-        count = 0
         for d in data_trn
             l, back = Flux.pullback(ps) do
                 mse_loss(dec,d...)
@@ -52,18 +75,18 @@ function train_dnn_dec(data; dec = nothing, kws...)
             #Running average
             l_av += l
             grad = back(1f0)
-            count += 1
             Flux.Optimise.update!(opt, ps, grad)
-            next!(progress; showvalues=[(:loss, l_av/count),(:epoch,epoch)])
-            if trn_step % args.verbose_freq == 0
-                push!(history[:mse_trn],l_av/count)
-            end
             trn_step += 1 
+            if trn_step % args.verbose_freq == 0
+                push!(history[:mse_trn],l_av/trn_step)
+            end
         end
+        next!(progress; showvalues=[(:loss, l_av/trn_step),(:epoch,epoch)])
         Δpt = (Flux.params(dec) .- initp)
         mse_tst = mean([mse_loss(dec,dtt...) for dtt in data_tst])
         push!(history[:mse_tst],mse_tst)
         push!(history[:ΔP],Δpt)
+        trigger(history[:mse_trn]) && break;
     end
     return dec, history
 end
