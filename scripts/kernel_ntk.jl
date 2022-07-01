@@ -47,6 +47,7 @@ end
 nets=8
 #Dataset parameters
 n_tst = Int.(1e5)
+P = 5000
 #Network parameters
 #N = 100
 #σi = 30/500
@@ -69,3 +70,18 @@ name = savename("lin_dec" , (@dict Nmin Nmax η γ),"jld2")
 data = Dict("NVec"=>NVec ,"σVec" => σVec,"linDec" => linDec)
 safesave(datadir("sims/linear_decoder",name) ,data)
 
+##
+idx_trn = rand(1:length(x_trn),1500*N)
+x_trn2 = x_trn[idx_trn]
+R_trn = V[:,idx_trn] + sqrt(η)*randn(N,1500*N)
+data_trn = Flux.Data.DataLoader((Float32.(R_trn),x_trn'),
+            batchsize = bs,shuffle = true);
+data_tst = Flux.Data.DataLoader((Float32.(R_tst),x_tst'),
+    batchsize = 100,shuffle = false);
+data = [data_trn,data_tst]
+mydec = Chain(Dense(Float32.(sqrt(0.001/Md)*randn(Md,N)),zeros(Float32,Md),relu),
+    Dense(Md,1,identity))
+#Train decoder and computes ideal error
+dec, history = train_dnn_dec(data,dec=mydec,
+    epochs=2000,min_diff=1e-8)
+##

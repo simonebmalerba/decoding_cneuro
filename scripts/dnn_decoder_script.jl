@@ -75,7 +75,7 @@ NVec = 20:20:100
 k =SqExponentialKernel()
 η = 0.3
 ## Run simulations
-d_dec  = [dnn_dec(N,σi) for σi=σVec,N=NVec]
+d_dec  = Dict((σi,N) => dnn_dec(N,σi) for σi = σVec,N=NVec)
 #Save results
 ##
 Nmin,Nmax = first(NVec),last(NVec)

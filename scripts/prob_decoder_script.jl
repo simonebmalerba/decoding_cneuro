@@ -64,7 +64,7 @@ NVec = 20:20:100
 k =SqExponentialKernel()
 η = 0.3
 ## Run simulations
-pdec  = [prob_decoder(N,σi) for σi=σVec,N=NVec]
+pdec  = Dict((σi,N) => prob_decoder(N,σi) for σi = σVec,N=NVec)
 #Save results
 ##
 Nmin,Nmax = first(NVec),last(NVec)
