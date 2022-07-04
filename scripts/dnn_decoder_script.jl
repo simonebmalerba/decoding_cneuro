@@ -13,7 +13,6 @@ include(srcdir("dnn_decoder.jl"))
 
 ##
 function dnn_dec(N::Int,σi; MaxEpochs=2000,nets=8,bs=50,opt=ADAM)
-    pdecDicts = Dict()
     t = ScaleTransform(1/(sqrt(2)*σi))
     #Kernel matrices
     K = kernelmatrix(k,t(vcat(x_samples,x_m)))

@@ -10,7 +10,7 @@ plotlyjs(size=(400,300))
 ##
 #c = C(cgrad(:viridis),N)
 
-#function ntk_decoder(N::Int,σi; nets = 8)
+function ntk_decoder(N::Int,σi; nets = 8)
     ntkDicts = Dict()
     t = ScaleTransform(1/(sqrt(2)*σi))
     @info N,σi
@@ -19,8 +19,9 @@ plotlyjs(size=(400,300))
     n_tste = Int(round(n_tst/P))
     idx_tst = repeat(1:P,n_tste)
     x_tst = repeat(x_trn,n_tste)
-    #for n = 1:nets
-        ntkD = Dict()
+    ntkDicts = Dict("$n"=> Dict() for n=1:nets)
+    for n = 1:nets
+        ntkD = ntkDicts["$n"]
         V = mvn_sample(K_id,N);
         V_m = V[:,end-M+1:end] 
         R_trn = V[:,1:P] + sqrt(η)*randn(N,P)
@@ -39,7 +40,6 @@ plotlyjs(size=(400,300))
         ntkD[:ε_id] = ε_id
         ntkD[:mse] = ε
         ntkD[:tc] = V_m
-        ntkDicts[:($n)] = ntkD
     end
     return ntkDicts
 end
@@ -47,22 +47,22 @@ end
 nets=8
 #Dataset parameters
 n_tst = Int.(1e5)
-P = 5000
+P = 3000
 #Network parameters
 #N = 100
 #σi = 30/500
 k = SqExponentialKernel()
-η = 0.1
+η = 0.3
 M=500
 ##
 bin = range(-0.5,0.5,length=M+1)
 x_m = bin[1:end-1] .+ diff(bin)/2
 ##
-σVec = (5:10:55)/500
+σVec = (5:8:55)/500
 #NVec = 60:20:200
 σi = 20/500
 N = 60
-ntkDec = [ntk_decoder(50,σi,nets=4) for σi = σVec]
+ntkDec = Dict((σi,N) => ntk_decoder(N,σi,nets=4) for σi = σVec)
 
 ##
 Nmin,Nmax = first(NVec),last(NVec)
@@ -74,14 +74,14 @@ safesave(datadir("sims/linear_decoder",name) ,data)
 idx_trn = rand(1:length(x_trn),1500*N)
 x_trn2 = x_trn[idx_trn]
 R_trn = V[:,idx_trn] + sqrt(η)*randn(N,1500*N)
-data_trn = Flux.Data.DataLoader((Float32.(R_trn),x_trn'),
+data_trn = Flux.Data.DataLoader((Float32.(R_trn),x_trn2'),
             batchsize = bs,shuffle = true);
 data_tst = Flux.Data.DataLoader((Float32.(R_tst),x_tst'),
     batchsize = 100,shuffle = false);
 data = [data_trn,data_tst]
-mydec = Chain(Dense(Float32.(sqrt(0.001/Md)*randn(Md,N)),zeros(Float32,Md),relu),
+mydec2 = Chain(Dense(Float32.(sqrt(0.001/Md)*randn(Md,N)),zeros(Float32,Md),relu),
     Dense(Md,1,identity))
 #Train decoder and computes ideal error
-dec, history = train_dnn_dec(data,dec=mydec,
+dec2, history2 = train_dnn_dec(data,dec=mydec2,
     epochs=2000,min_diff=1e-8)
 ##
