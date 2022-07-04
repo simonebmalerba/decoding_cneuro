@@ -54,7 +54,6 @@ c2 = C(cgrad(:speed),5)
 εo = [findmin.(ε,dims=1)[n][1] for n=1:8]
 lbo = findmin(lb,dims=1)[1]
 εo_id = [findmin.(ε_id,dims=1)[n][1] for n=1:8]
-ε_id
 #σo = [[σVec[I[1]] for I  = findmin.(ε,dims=1)[n][2]] for n=1:8]
 scatter!(p3,NVec,mean(εo)',m=:o,markersize=6,c=c2[3])
 plot!(p3,NVec,lbo',c=c2[5],label=L"$\gamma=20$")

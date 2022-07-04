@@ -35,13 +35,13 @@ function prob_decoder(N::Int,σi; MaxEpochs=2000,nets=8,bs=50,opt=ADAM)
         #Format data for probabilistic_decoder
         data,x_m = one_hotdataset(x_trn,x_tst,R_trn,R_tst,M,bs=bs)
         #Train decoder and computes ideal error
-        p_dec, history = train_prob_decoder(data,x_m,x_tst,M=M,
-            epochs=MaxEpochs,opt= opt)
+        #p_dec, history = train_prob_decoder(data,x_m,x_tst,M=M,
+        #    epochs=MaxEpochs,opt= opt)
         ε_id = mse_ideal(V_m,η,x_m,R_tst,x_tst')
         #Store: pecoder, ideal error, history of training and tuning curves
         pdecD[:ε_id] =ε_id
-        pdecD[:prob_dec] = p_dec
-        pdecD[:history] = history
+        #pdecD[:prob_dec] = p_dec
+        #pdecD[:history] = history
         pdecD[:tc] = V_m
         @info "Finished" n  Threads.threadid()
     end
@@ -60,11 +60,11 @@ bin = range(-0.5,0.5,length=M+1)
 x_m = bin[1:end-1] .+ diff(bin)/2
 # Network parameters
 σVec = (5:8:54)/500
-NVec = 20:10:60
+NVec = 10:10:40
 k =SqExponentialKernel()
-η = 0.5
+η = 0.3
 ## Run simulations
-pdec  = Dict((σi,N) => prob_decoder(N,σi) for σi = σVec,N=NVec)
+pdec  = Dict((σi,N) => prob_decoder(N,σi,nets=1) for σi = σVec,N=NVec)
 #Save results
 ##
 Nmin,Nmax = first(NVec),last(NVec)

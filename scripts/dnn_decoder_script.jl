@@ -57,7 +57,7 @@ nets =8   #Numbers of test networks
 #Dataset parameters
 P_i= 2000  #How many I can sample from (not so important)
 n_tst = Int.(1e5)
-γ = 2 #Parameter/datapoint ratio
+γ = 3 #Parameter/datapoint ratio
 
 x_samples = sort((rand(Float32,P_i).-0.5f0))
 #Ideal decoder parameters
@@ -67,14 +67,16 @@ x_m = bin[1:end-1] .+ diff(bin)/2
 ##
 #Decoding parameters
 α = 0.001 #Variance of weights at initialization
+
 Md = 1000 #Hidden layer size
 # Network parameters
 σVec = (5:8:54)/500
 NVec = 20:10:60
+
 k =SqExponentialKernel()
-η = 0.5
+η = 0.3
 ## Run simulations
-d_dec  = Dict((σi,N) => dnn_dec(N,σi) for σi = σVec,N=NVec)
+d_dec  = Dict((σi,N) => dnn_dec(N,σi) for σi = σVec[1],N=NVec[1])
 #Save results
 ##
 Nmin,Nmax = first(NVec),last(NVec)
