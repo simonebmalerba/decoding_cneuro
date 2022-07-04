@@ -60,9 +60,9 @@ bin = range(-0.5,0.5,length=M+1)
 x_m = bin[1:end-1] .+ diff(bin)/2
 # Network parameters
 σVec = (5:8:54)/500
-NVec = 20:20:100
+NVec = 20:10:60
 k =SqExponentialKernel()
-η = 0.3
+η = 0.5
 ## Run simulations
 pdec  = Dict((σi,N) => prob_decoder(N,σi) for σi = σVec,N=NVec)
 #Save results

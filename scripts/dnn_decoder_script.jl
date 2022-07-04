@@ -70,9 +70,9 @@ x_m = bin[1:end-1] .+ diff(bin)/2
 Md = 1000 #Hidden layer size
 # Network parameters
 σVec = (5:8:54)/500
-NVec = 20:20:100
+NVec = 20:10:60
 k =SqExponentialKernel()
-η = 0.3
+η = 0.5
 ## Run simulations
 d_dec  = Dict((σi,N) => dnn_dec(N,σi) for σi = σVec,N=NVec)
 #Save results
