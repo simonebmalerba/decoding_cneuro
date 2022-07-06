@@ -64,7 +64,7 @@ function train_dnn_dec(data; dec = nothing, kws...)
     #Save training history
     history = Dict(:mse_trn => Float32[],:mse_tst => Float32[],:ΔP => [])
     trn_step =0
-    trigger = plateau(last, 5; init_score=0,min_dist=args.min_diff);
+    trigger = plateau(last, 10; init_score=0,min_dist=args.min_diff);
     l_av = 0
     progress = Progress(args.epochs)
     for epoch = 1:args.epochs
@@ -77,7 +77,7 @@ function train_dnn_dec(data; dec = nothing, kws...)
             grad = back(1f0)
             Flux.Optimise.update!(opt, ps, grad)
             trn_step += 1 
-            if trn_step % args.verbose_freq == 0
+            if (trn_step % args.verbose_freq == 0) | (trn_step==1)
                 push!(history[:mse_trn],l_av/trn_step)
             end
         end

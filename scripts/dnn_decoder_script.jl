@@ -12,7 +12,7 @@ include(srcdir("dnn_decoder.jl"))
 ##
 
 ##
-function dnn_dec(N::Int,σi; MaxEpochs=2000,nets=8,bs=50,opt=ADAM)
+function dnn_dec(N::Int,σi; MaxEpochs=2000,nets=8,bs=128,opt=ADAM)
     t = ScaleTransform(1/(sqrt(2)*σi))
     #Kernel matrices
     K = kernelmatrix(k,t(vcat(x_samples,x_m)))
@@ -35,13 +35,13 @@ function dnn_dec(N::Int,σi; MaxEpochs=2000,nets=8,bs=50,opt=ADAM)
         data_trn = Flux.Data.DataLoader((Float32.(R_trn),x_trn'),
             batchsize = bs,shuffle = true);
         data_tst = Flux.Data.DataLoader((Float32.(R_tst),x_tst'),
-        batchsize = 100,shuffle = false);
+            batchsize = 512,shuffle = false);
         data = [data_trn,data_tst]
         mydec = Chain(Dense(Float32.(sqrt(α/Md)*randn(Md,N)),zeros(Float32,Md),relu),
             Dense(Md,1,identity))
         #Train decoder and computes ideal error
         dec, history = train_dnn_dec(data,dec=mydec,
-            epochs=MaxEpochs,opt= opt)
+            epochs=MaxEpochs)
         ε_id = mse_ideal(V_m,η,x_m,R_tst,x_tst')
         #Store: pecoder, ideal error, history of training and tuning curves
         ddecD[:ε_id] =ε_id
@@ -71,12 +71,12 @@ x_m = bin[1:end-1] .+ diff(bin)/2
 Md = 1000 #Hidden layer size
 # Network parameters
 σVec = (5:8:54)/500
-NVec = 20:10:60
+NVec = 10:10:50
 
 k =SqExponentialKernel()
 η = 0.3
 ## Run simulations
-d_dec  = Dict((σi,N) => dnn_dec(N,σi) for σi = σVec[1],N=NVec[1])
+d_dec  = Dict((σi,N) => dnn_dec(N,σi) for σi = σVec,N=NVec)
 #Save results
 ##
 Nmin,Nmax = first(NVec),last(NVec)
