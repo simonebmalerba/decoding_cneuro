@@ -12,13 +12,13 @@ using ProgressMeter: Progress, next!
 end
 
 @with_kw mutable struct TrainArgsDnn
-    lr = 1e-4              # learning rate
+    lr = 1f-4              # learning rate
     epochs = 50             # number of epochs
     M = 500                 # latent dimension
     verbose_freq = 10       # logging for every verbose_freq iterations
     opt = ADAM             #Optimizer
     f = relu               ##Specify non linearity
-    min_diff = 1e-8
+    min_diff = 1f-8
 end
 ##
 function patience(predicate, wait)
