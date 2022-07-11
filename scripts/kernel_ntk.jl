@@ -69,16 +69,16 @@ ntkDec = Dict((σi,N) => ntk_decoder(N,σi) for σi = σVec,N=NVec)
 
 ##
 Nmin,Nmax = first(NVec),last(NVec)
-name = savename("lin_dec" , (@dict Nmin Nmax η γN),"jld2")
-data = Dict("NVec"=>NVec ,"σVec" => σVec,"linDec" => linDec)
-safesave(datadir("sims/linear_decoder",name) ,data)
+name = savename("ntkRelu_dec" , (@dict Nmin Nmax η γN),"jld2")
+data = Dict("NVec"=>NVec ,"σVec" => σVec,"ntkDec" => linDec)
+safesave(datadir("sims/ntk_decoder",name) ,data)
 
 ##
 #idx_trn = rand(1:length(x_trn),1500*N)
 #x_trn2 = x_trn[idx_trn]
 #R_trn = V[:,idx_trn] + sqrt(η)*randn(N,1500*N)
 #data_trn = Flux.Data.DataLoader((Float32.(R_trn),x_trn'),
-            batchsize = 2000,shuffle = true);
+#            batchsize = 2000,shuffle = true);
 #data_tst = Flux.Data.DataLoader((Float32.(R_tst),x_tst'),
 #    batchsize = 100,shuffle = false);
 #data = [data_trn,data_tst]
