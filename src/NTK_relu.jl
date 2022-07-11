@@ -10,7 +10,7 @@ function (κ::NTKRelu)(x, y)
     validate_inputs(x,y)
     xn,yn = norm(x),norm(y)
     u = clamp(dot(x,y)/(xn*yn),-1,1)
-    return xn*yn*(u(1-acos(u)/π) + (√(1-u^2))/π)
+    return xn*yn*(2*u(1-acos(u)/π) + (√(1-u^2))/π)
 end
 
 function kernelmatrix(::NTKRelu, x::ColVecs, y::ColVecs)
