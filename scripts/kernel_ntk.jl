@@ -7,6 +7,7 @@ include(srcdir("kernel_utilities.jl"))
 include(srcdir("plot_utils.jl"))
 include(srcdir("utils.jl"))
 include(srcdir("NTK_relu.jl"))
+include(srcdir("NeuralNetworkKernel_clipped.jl"))
 plotlyjs(size=(400,300))
 ##
 #c = C(cgrad(:viridis),N)
@@ -65,7 +66,7 @@ x_m = bin[1:end-1] .+ diff(bin)/2
 #NVec = 60:20:200
 #σi = 20/500
 NVec = 10:10:50
-ntkDec = Dict((σi,N) => ntk_decoder(N,σi) for σi = σVec,N=NVec)
+ntkDec = Dict((σi,N) => ntk_decoder(N,σi,nets=2) for σi = σVec,N=NVec[2])
 
 ##
 Nmin,Nmax = first(NVec),last(NVec)

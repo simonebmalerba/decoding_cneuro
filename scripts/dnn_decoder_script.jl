@@ -20,6 +20,8 @@ function dnn_dec(N::Int,σi; MaxEpochs=2000,nets=8,bs=128,opt=ADAM)
     P = Md*N*γ
     @info N,P,σi
     ddecDicts = Dict("$n"=> Dict() for n=1:nets)
+    idx_tst = rand(1:length(x_samples),n_tst)
+    x_tst = x_samples[idx_tst]
     Threads.@threads for n = 1:nets
         ddecD = ddecDicts["$n"]
         #Generate data
@@ -28,8 +30,6 @@ function dnn_dec(N::Int,σi; MaxEpochs=2000,nets=8,bs=128,opt=ADAM)
         idx_trn = rand(1:length(x_samples),P)
         x_trn = x_samples[idx_trn]
         R_trn = V[:,idx_trn] + sqrt(η)*randn(N,P)
-        idx_tst = rand(1:length(x_samples),n_tst)
-        x_tst = x_samples[idx_tst]
         R_tst = V[:,idx_tst] + sqrt(η)*randn(N,n_tst)
         #Format data for probabilistic_decoder
         data_trn = Flux.Data.DataLoader((Float32.(R_trn),x_trn'),
@@ -37,11 +37,13 @@ function dnn_dec(N::Int,σi; MaxEpochs=2000,nets=8,bs=128,opt=ADAM)
         data_tst = Flux.Data.DataLoader((Float32.(R_tst),x_tst'),
             batchsize = 512,shuffle = false);
         data = [data_trn,data_tst]
+        #Initialize decoder architecture
         mydec = Chain(Dense(Float32.(sqrt(α/Md)*randn(Md,N)),zeros(Float32,Md),relu),
             Dense(Md,1,identity))
         #Train decoder and computes ideal error
         dec, history = train_dnn_dec(data,dec=mydec,
             epochs=MaxEpochs)
+        #Ideal error
         ε_id = mse_ideal(V_m,η,x_m,R_tst,x_tst')
         #Store: pecoder, ideal error, history of training and tuning curves
         ddecD[:ε_id] =ε_id
@@ -57,7 +59,7 @@ nets =8   #Numbers of test networks
 #Dataset parameters
 P_i= 2000  #How many I can sample from (not so important)
 n_tst = Int.(1e5)
-γ = 3 #Parameter/datapoint ratio
+γ = 3 #datapoint/parameter ratio
 
 x_samples = sort((rand(Float32,P_i).-0.5f0))
 #Ideal decoder parameters
@@ -76,7 +78,7 @@ NVec = 10:10:50
 k =SqExponentialKernel()
 η = 0.3
 ## Run simulations
-d_dec  = Dict((σi,N) => dnn_dec(N,σi) for σi = σVec,N=NVec)
+d_dec  = Dict((σi,N) => dnn_dec(N,σi) for σi = σVec[end],N=NVec[1])
 #Save results
 ##
 Nmin,Nmax = first(NVec),last(NVec)
