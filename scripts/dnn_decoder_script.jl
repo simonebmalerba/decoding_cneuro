@@ -22,7 +22,7 @@ function dnn_dec(N::Int,σi; MaxEpochs=2000,nets=8,bs=128,opt=ADAM)
     ddecDicts = Dict("$n"=> Dict() for n=1:nets)
     idx_tst = rand(1:length(x_samples),n_tst)
     x_tst = x_samples[idx_tst]
-    Threads.@threads for n = 1:nets
+    for n = 1:nets
         ddecD = ddecDicts["$n"]
         #Generate data
         V = mvn_sample(K,N);
@@ -42,7 +42,7 @@ function dnn_dec(N::Int,σi; MaxEpochs=2000,nets=8,bs=128,opt=ADAM)
             Dense(Md,1,identity))
         #Train decoder and computes ideal error
         dec, history = train_dnn_dec(data,dec=mydec,
-            epochs=MaxEpochs)
+            epochs=MaxEpochs,min_diff=1f-7)
         #Ideal error
         ε_id = mse_ideal(V_m,η,x_m,R_tst,x_tst')
         #Store: pecoder, ideal error, history of training and tuning curves
@@ -78,7 +78,7 @@ NVec = 10:10:50
 k =SqExponentialKernel()
 η = 0.3
 ## Run simulations
-d_dec  = Dict((σi,N) => dnn_dec(N,σi) for σi = σVec[end],N=NVec[1])
+d_dec  = Dict((σi,N) => dnn_dec(N,σi) for σi = σVec,N=NVec)
 #Save results
 ##
 Nmin,Nmax = first(NVec),last(NVec)
