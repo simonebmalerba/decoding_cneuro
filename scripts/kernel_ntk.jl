@@ -31,8 +31,8 @@ function ntk_decoder(N::Int,σi; nets = 8)
         #Sample more data points for testing
         R_tst = V[:,idx_tst] + sqrt(η)*randn(N,length(idx_tst))
         #Kernel regression solution
-        k_ntk = NTKRelu()
-        #k_ntk = NeuralNetworkKernel()
+        #k_ntk = NTKRelu()
+        k_ntk = NeuralNetworkKernel()
         K_NTK = kernelmatrix(k_ntk,R_trn)
         k_r = kernelmatrix(k_ntk,R_trn,R_tst)
         α = K_NTK\x_trn
@@ -51,27 +51,28 @@ end
 nets=8
 #Dataset parameters
 n_tst = Int.(1e5)
-γN = 80
+γN = 100
 #Network parameters
 #N = 100
 #σi = 30/500
 k = SqExponentialKernel()
-η = 0.3
+η = 0.1
 M=500
 ##
 bin = range(-0.5,0.5,length=M+1)
 x_m = bin[1:end-1] .+ diff(bin)/2
 ##
+
 σVec = (5:8:55)/500
 #NVec = 60:20:200
 #σi = 20/500
 NVec = 10:10:50
-ntkDec = Dict((σi,N) => ntk_decoder(N,σi,nets=2) for σi = σVec,N=NVec[2])
+ntkDec = Dict((σi,N) => ntk_decoder(N,σi,nets=2) for σi = σVec,N=NVec[end])
 
 ##
 Nmin,Nmax = first(NVec),last(NVec)
-name = savename("ntkRelu_dec" , (@dict Nmin Nmax η γN),"jld2")
-data = Dict("NVec"=>NVec ,"σVec" => σVec,"ntkDec" => linDec)
+name = savename("ntkErf_dec" , (@dict Nmin Nmax η γN),"jld2")
+data = Dict("NVec"=>NVec ,"σVec" => σVec,"ntkDec" => ntkDec)
 safesave(datadir("sims/ntk_decoder",name) ,data)
 
 ##

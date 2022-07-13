@@ -5,33 +5,38 @@ using Plots
 using StatsBase,Distributions
 include(srcdir("plot_utils.jl"))
 ##
-mydir= datadir("sims/linear_decoder")
-flnames = filter(x ->occursin(r"lin_dec",x),
+#mydir= datadir("sims/linear_decoder")
+mydir= datadir("sims/ntk_decoder")
+flnames = filter(x ->occursin(r"ntkErf",x),
     readdir(mydir))
-myf = flnames[5]
+myf = flnames[1]
 data = load(datadir(mydir,myf))
 γ_e = split(myf,('_'))[findfirst(occursin.("γ",split(myf,'_')))] 
 γ = eval.(Meta.parse.(γ_e))
 σVec = data["σVec"]
 NVec = data["NVec"]
-linDec = data["linDec"]
-η =0.1
+#linDec = data["linDec"]
+ntkDec = data["ntkDec"]
+η =0.3
 #γ = 20
 ##
-ε = [[linDec[(σi,N)][n][:mse] for σi = σVec,N=NVec] for n=1:8]
-lb = mean([[/(linDec[(σi,N)][n][:lb]...) for σi = σVec,N=NVec] for n=1:8])
-ε_id = [[linDec[(σi,N)][n][:ε_id] for σi = σVec,N=NVec] for n=1:8]
+ε = [[ntkDec[(σi,N)]["$n"][:mse] for σi = σVec,N=NVec] for n=1:8]
+#lb = mean([[/(linDec[(σi,N)][n][:lb]...) for σi = σVec,N=NVec] for n=1:8])
+ε_id = [[ntkDec[(σi,N)]["$n"][:ε_id] for σi = σVec,N=NVec] for n=1:8]
 c1 = C(cgrad(:viridis),length(NVec))
 #p1 = plot(size=(400,300))
-yt = ([10^(-3.5) , 10^(-3), 10^(-2.5), 10^(-2) ],["0.003","0.001","0.003","0.001"])
-p1 = scatter(σVec,mean(ε), xlabel=L"$\sigma$",ylabel = L"$\varepsilon^2$",
-    m=:o,markersize=6,yaxis=:log10,legend=:none,c=c1',yticks=yt)
+yt = ([10^(-3.5) , 10^(-3), 10^(-2.5), 10^(-2) ],["0.0003","0.001","0.003","0.01"])
+plot(σVec,mean(ε), xlabel=L"$\sigma$",ylabel = L"$\varepsilon^2$",
+    m=:o,linewidth=1,linestyle=:dash,markersize=6,yaxis=:log10,c=c1',legend=:none)#)
 ##Error curves asa function of σ
-plot!(p1,σVec,lb,yaxis=:log10,c=c1',linewidth=1,linealpha=0.7)
-#plot!(p1[1],σVec,mean(ε_id)[:,1], xlabel=L"$\sigma$",ylabel = L"$\varepsilon^2$",
-#    markersize=6,yaxis=:log10,legend=:none,c="black")
-name = savename("evssigma" , (@dict  η γ),"svg")
-#safesave(plotsdir("lin_dec",name) ,p1)
+#plot!(p1,σVec,lb,yaxis=:log10,c=c1',linewidth=1,linealpha=0.7)
+plot!(p1,σVec,mean(ε_id), xlabel=L"$\sigma$",ylabel = L"$\varepsilon^2$",
+    markersize=6,linewidth=1,m=:diamond,yaxis=:log10,c=c1')
+name = savename("evssigma_Erf" , (@dict  η γ),"svg")
+safesave(plotsdir("ntk_dec",name) ,p1)
+##
+p2 = plot(σVec,mean(ε)./mean(ε_id), xlabel=L"$\sigma$",ylabel = L"$\varepsilon^2$",
+    m=:o,markersize=6,yaxis=:log10,legend=:none,c=c1')
 ##
 B = mean([[linDec[(σi,N)][n][:bias] for σi = σVec,N=NVec] for n=1:8])
 V2 = mean([[linDec[(σi,N)][n][:V2] for σi = σVec,N=NVec] for n=1:8])
