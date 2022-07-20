@@ -31,7 +31,7 @@ function M_comp(σi; MaxEpochs=2000,bs=128,opt=ADAM,MaxPasses = 2*10E7)
     ε_id = mse_ideal(V_m,η,x_m,R_tst,x_tst')
     #Store: pecoder, ideal error, history of training and tuning curves
     ddecDicts[:ε_id] =ε_id
-    ddecDicts[:dnn] = Dict(Md=> Dict() for Md=1:MVec)
+    ddecDicts[:dnn] = Dict(Md=> Dict() for Md=MVec)
     for Md=MVec
         ddecD = ddecDicts[:dnn][Md]
         P = Md*N*γ

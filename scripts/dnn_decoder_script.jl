@@ -55,7 +55,7 @@ function dnn_dec(N::Int,σi; MaxEpochs=2000,nets=8,bs=128,opt=ADAM)
     return ddecDicts
 end
 ##
-nets =8   #Numbers of test networks
+nets = 4   #Numbers of test networks
 #Dataset parameters
 P_i= 2000  #How many I can sample from (not so important)
 n_tst = Int.(1e5)
@@ -73,12 +73,12 @@ x_m = bin[1:end-1] .+ diff(bin)/2
 Md = 1000 #Hidden layer size
 # Network parameters
 σVec = (5:8:54)/500
-NVec = 10:10:50
+NVec = 40:10:50
 
 k =SqExponentialKernel()
 η = 0.3
 ## Run simulations
-d_dec  = Dict((σi,N) => dnn_dec(N,σi) for σi = σVec,N=NVec)
+d_dec  = Dict((σi,N) => dnn_dec(N,σi,nets=nets) for σi = σVec,N=NVec)
 #Save results
 ##
 Nmin,Nmax = first(NVec),last(NVec)
