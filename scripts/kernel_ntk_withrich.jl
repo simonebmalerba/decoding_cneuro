@@ -8,16 +8,16 @@ include(srcdir("plot_utils.jl"))
 include(srcdir("utils.jl"))
 include(srcdir("NTK_relu.jl"))
 include(srcdir("NeuralNetworkKernel_clipped.jl"))
+include(srcdir("dnn_decoder.jl"))
 
 plotlyjs(size=(400,300))
 ##
 #c = C(cgrad(:viridis),N)
 
-function ntk_decoder(N::Int,σi; nets = 8,rich=0)
+function ntk_decoder_wr(σi; nets = 8)
     ntkDicts = Dict()
     t = ScaleTransform(1/(sqrt(2)*σi))
-    P= γN*N
-    @info N,σi,P
+    @info σi
     x_trn = sort((rand(Float32,P).-0.5f0))
     K_id = kernelmatrix(k,t(vcat(x_trn,x_m)))
     n_tste = Int(round(n_tst/P))
@@ -39,12 +39,24 @@ function ntk_decoder(N::Int,σi; nets = 8,rich=0)
         α = K_NTK\x_trn
         x_ext = (α'*k_r)'
         ε = mean((x_ext-x_tst).^2)
+        data_trn = Flux.Data.DataLoader((Float32.(R_trn),x_trn'),
+                        batchsize = 128,shuffle = true);
+        data_tst = Flux.Data.DataLoader((Float32.(R_tst),x_tst'),
+                        batchsize = 100,shuffle = false);
+        data = [data_trn,data_tst]
+        mydec = Chain(Dense(Float32.(sqrt(0.001/Md)*randn(Md,N)),zeros(Float32,Md),relu),
+            Dense(Md,1,identity))
+        #Train decoder and computes ideal error
+        dec, history = train_dnn_dec(data,dec=mydec,
+            epochs=MaxEpochs,opt=ADAM,min_diff=1f-7)
         @info ε
         #Decoder output
         ε_id = mse_ideal(V_m,η,x_m,R_tst,x_tst')
         ntkD[:ε_id] = ε_id
         ntkD[:mse] = ε
         ntkD[:tc] = V_m
+        ntkD[:history_rich] = history
+        ntkD[:dec] = dec
     end
     return ntkDicts
 end
@@ -67,11 +79,15 @@ x_m = bin[1:end-1] .+ diff(bin)/2
 σVec = (5:8:55)/500
 #NVec = 60:20:200
 #σi = 20/500
-NVec = 30:10:50
-ntkDec = Dict((σi,N) => ntk_decoder(N,σi,nets=2) for σi = σVec,N=NVec[end])
+N = 50
+P= γN*N
+#
+Md = 1000
+MaxEpochs = 5000
+ntkDec = Dict((σi) => ntk_decoder_wr(σi) for σi = σVec)
 ##
 Nmin,Nmax = first(NVec),last(NVec)
-name = savename("ntkErf_dec" , (@dict Nmin Nmax η γN),"jld2")
+name = savename("ntkwrich_dec" , (@dict N η γN),"jld2")
 data = Dict("NVec"=>NVec ,"σVec" => σVec,"ntkDec" => ntkDec)
-safesave(datadir("sims/ntk_decoder",name) ,data)
+safesave(datadir("sims/ntk_decodervsrich",name) ,data)
 
