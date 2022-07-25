@@ -73,7 +73,7 @@ x_m = bin[1:end-1] .+ diff(bin)/2
 Md = 1000 #Hidden layer size
 # Network parameters
 σVec = (5:8:54)/500
-NVec = 40:10:50
+NVec = 10:10:30
 
 k =SqExponentialKernel()
 η = 0.3

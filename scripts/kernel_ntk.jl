@@ -4,12 +4,12 @@ using DrWatson
 #Strutcture and function for 1D model and ML-MSE inference
 #using TensorBoardLogger,Logging
 include(srcdir("kernel_utilities.jl"))
-include(srcdir("plot_utils.jl"))
+#include(srcdir("plot_utils.jl"))
 include(srcdir("utils.jl"))
 include(srcdir("NTK_relu.jl"))
 include(srcdir("NeuralNetworkKernel_clipped.jl"))
 
-plotlyjs(size=(400,300))
+#plotlyjs(size=(400,300))
 ##
 #c = C(cgrad(:viridis),N)
 
@@ -52,12 +52,12 @@ end
 nets=8
 #Dataset parameters
 n_tst = Int.(1e5)
-γN = 100
+γN = 200
 #Network parameters
 #N = 100
 #σi = 30/500
 k = SqExponentialKernel()
-η = 0.3
+η = 0.1
 M=500
 ##
 bin = range(-0.5,0.5,length=M+1)
@@ -67,8 +67,8 @@ x_m = bin[1:end-1] .+ diff(bin)/2
 σVec = (5:8:55)/500
 #NVec = 60:20:200
 #σi = 20/500
-NVec = 30:10:50
-ntkDec = Dict((σi,N) => ntk_decoder(N,σi,nets=2) for σi = σVec,N=NVec[end])
+NVec = 50:10:50
+ntkDec = Dict((σi,N) => ntk_decoder(N,σi) for σi = σVec,N=NVec)
 ##
 Nmin,Nmax = first(NVec),last(NVec)
 name = savename("ntkErf_dec" , (@dict Nmin Nmax η γN),"jld2")

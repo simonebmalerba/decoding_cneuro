@@ -4,13 +4,13 @@ using DrWatson
 #Strutcture and function for 1D model and ML-MSE inference
 #using TensorBoardLogger,Logging
 include(srcdir("kernel_utilities.jl"))
-include(srcdir("plot_utils.jl"))
+#include(srcdir("plot_utils.jl"))
 include(srcdir("utils.jl"))
 include(srcdir("NTK_relu.jl"))
 include(srcdir("NeuralNetworkKernel_clipped.jl"))
 include(srcdir("dnn_decoder.jl"))
 
-plotlyjs(size=(400,300))
+#plotlyjs(size=(400,300))
 ##
 #c = C(cgrad(:viridis),N)
 
