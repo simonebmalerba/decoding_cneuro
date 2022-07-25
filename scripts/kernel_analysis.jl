@@ -9,7 +9,7 @@ include(srcdir("plot_utils.jl"))
 mydir= datadir("sims/ntk_decoder")
 flnames = filter(x ->occursin(r"ntkErf",x),
     readdir(mydir))
-myf = flnames[3]
+myf = flnames[4]
 data = load(datadir(mydir,myf))
 γ_e = split(myf,('_'))[findfirst(occursin.("γ",split(myf,'_')))] 
 γ = eval.(Meta.parse.(γ_e))
@@ -23,15 +23,17 @@ ntkDec = data["ntkDec"]
 ε = [[ntkDec[(σi,N)]["$n"][:mse] for σi = σVec,N=NVec] for n=1:8]
 #lb = mean([[/(linDec[(σi,N)][n][:lb]...) for σi = σVec,N=NVec] for n=1:8])
 ε_id = [[ntkDec[(σi,N)]["$n"][:ε_id] for σi = σVec,N=NVec] for n=1:8]
-c1 = C(cgrad(:viridis),length(NVec))
+c1 = C(cgrad(:viridis),length(NVec)+2)
 #p1 = plot(size=(400,300))
 #yt = ([10^(-3.5) , 10^(-3), 10^(-2.5), 10^(-2) ],["0.0003","0.001","0.003","0.01"])
-p1 = plot(σVec,mean(ε), xlabel=L"$\sigma$",ylabel = L"$\varepsilon^2$",
+p1 = plot(σVec,mean(ε),ribbon=std(ε), xlabel=L"$\sigma$",ylabel = L"$\varepsilon^2$",
+    m=:o,linewidth=1,linestyle=:dash,markersize=6,yaxis=:log10,c=c1[3:end]',legend=:none)#)
+#plot!(p1,σVec,mean(ε), xlabel=L"$\sigma$",ylabel = L"$\varepsilon^2$",
     m=:o,linewidth=1,linestyle=:dash,markersize=6,yaxis=:log10,c=c1',legend=:none)#)
 ##Error curves asa function of σ
 #plot!(p1,σVec,lb,yaxis=:log10,c=c1',linewidth=1,linealpha=0.7)
 plot!(p1,σVec,mean(ε_id), xlabel=L"$\sigma$",ylabel = L"$\varepsilon^2$",
-    markersize=6,linewidth=1,m=:diamond,yaxis=:log10,c=c1')
+    markersize=6,linewidth=1,m=:diamond,yaxis=:log10,c=c1[3:end]')
 name = savename("evssigma_Erf" , (@dict  η γ),"svg")
 safesave(plotsdir("ntk_dec",name) ,p1)
 ##

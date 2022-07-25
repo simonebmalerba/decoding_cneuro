@@ -27,10 +27,10 @@ pDec = data["prob_decoder"]
 c1 = C(cgrad(:viridis),length(NVec))
 
 
-p1 = plot(σVec,mean(ε_last),yaxis=:log10,markersize=6,
+p1 = plot(σVec,mean(ε_last),ribbon=std(ε_last),yaxis=:log10,markersize=6,
      c=c1',legend=:none,m=:o,xlabel=L"$\sigma$",ylabel = L"$\varepsilon^2$")
 name = savename("evssigma" , (@dict  η γ),"svg")
-#safesave(plotsdir("prob_dec",name) ,p1)
+safesave(plotsdir("prob_dec",name) ,p1)
 #plot!(σVec,mean(ε_id),yaxis=:log10,legend=:none,c=c1')
 
 ##

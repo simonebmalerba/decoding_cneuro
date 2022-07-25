@@ -61,7 +61,7 @@ function ntk_decoder_wr(σi; nets = 8)
     return ntkDicts
 end
 ##
-nets=8
+nets=4
 #Dataset parameters
 n_tst = Int.(1e5)
 γN = 100
@@ -84,10 +84,10 @@ P= γN*N
 #
 Md = 1000
 MaxEpochs = 5000
-ntkDec = Dict((σi) => ntk_decoder_wr(σi) for σi = σVec)
+ntkDec = Dict((σi) => ntk_decoder_wr(σi,nets=nets) for σi = σVec)
 ##
-Nmin,Nmax = first(NVec),last(NVec)
+#Nmin,Nmax = first(NVec),last(NVec)
 name = savename("ntkwrich_dec" , (@dict N η γN),"jld2")
-data = Dict("NVec"=>NVec ,"σVec" => σVec,"ntkDec" => ntkDec)
+data = Dict("σVec" => σVec,"ntkDec" => ntkDec)
 safesave(datadir("sims/ntk_decodervsrich",name) ,data)
 

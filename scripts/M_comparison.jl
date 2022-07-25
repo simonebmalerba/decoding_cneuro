@@ -37,7 +37,7 @@ function M_comp(σi; MaxEpochs=2000,bs=128,opt=ADAM,MaxPasses = 2*10E7)
         P = Md*N*γ
         #Adapt MaxEpochs to number of training points
         MaxEpochs = Int(round(MaxPasses/P))
-        @info Md,P,σi,MaxEpochs
+        @info P,σi,MaxEpochs
         idx_trn = rand(1:length(x_samples),P)
         x_trn = x_samples[idx_trn]
         R_trn = V[:,idx_trn] + sqrt(η)*randn(N,P)
@@ -84,5 +84,5 @@ d_dec  = Dict((σi,n) => M_comp(σi) for σi = σVec, n=1:nets)
 ##
 Mmin,Mmax = first(MVec),last(MVec)
 name = savename("Mcomp" , (@dict N γ η Mmax Mmin α),"jld2")
-data = Dict("NVec"=>NVec ,"σVec" => σVec,"dnn_decoder" => d_dec)
+data = Dict("MVec"=>MVec ,"σVec" => σVec,"dnn_decoder" => d_dec)
 safesave(datadir("sims/dnn_decoder",name) ,data)
