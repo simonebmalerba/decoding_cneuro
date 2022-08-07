@@ -16,7 +16,7 @@ function M_comp(σi; MaxEpochs=2000,bs=128,opt=ADAM,MaxPasses = 2*10E7)
     t = ScaleTransform(1/(sqrt(2)*σi))
     #Kernel matrices
     K = kernelmatrix(k,t(vcat(x_samples,x_m)))
-    #Parameters to datapoint ratio
+    #Parameters to datapoint ratioi
     ddecDicts = Dict()
     idx_tst = rand(1:length(x_samples),n_tst)
     #Generate data
@@ -36,7 +36,7 @@ function M_comp(σi; MaxEpochs=2000,bs=128,opt=ADAM,MaxPasses = 2*10E7)
         ddecD = ddecDicts[:dnn][Md]
         P = Md*N*γ
         #Adapt MaxEpochs to number of training points
-        MaxEpochs = Int(round(MaxPasses/P))
+        MaxEpochs = 10#Int(round(MaxPasses/P))
         @info P,σi,MaxEpochs
         idx_trn = rand(1:length(x_samples),P)
         x_trn = x_samples[idx_trn]
@@ -50,7 +50,7 @@ function M_comp(σi; MaxEpochs=2000,bs=128,opt=ADAM,MaxPasses = 2*10E7)
             Dense(Md,1,identity))
         #Train decoder and computes ideal error
         dec, history = train_dnn_dec(data,dec=mydec,
-            epochs=MaxEpochs,min_diff=1f-8)
+            epochs=MaxEpochs,min_diff=1f-7)
         ddecD[:dnn_dec] = dec
         ddecD[:history] = history
         @info "Finished" Md  
@@ -75,7 +75,7 @@ x_m = bin[1:end-1] .+ diff(bin)/2
 # Network parameters
 σVec = (5:8:54)/500
 N =  50
-MVec = [10,25,50,100,250,500,1000]#Int.(round.(10 .^(range(1,3,length=7))))
+MVec = [5,10,20,30,50,75,100,125,150,200,250,300,400,500]
 k =SqExponentialKernel()
 η = 0.3
 ## Run simulations

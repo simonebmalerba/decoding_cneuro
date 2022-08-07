@@ -17,7 +17,7 @@ include(srcdir("dnn_decoder.jl"))
 function ntk_decoder_wr(σi; nets = 8)
     ntkDicts = Dict()
     t = ScaleTransform(1/(sqrt(2)*σi))
-    @info σi
+    @info σi,nets
     x_trn = sort((rand(Float32,P).-0.5f0))
     K_id = kernelmatrix(k,t(vcat(x_trn,x_m)))
     n_tste = Int(round(n_tst/P))
@@ -44,12 +44,12 @@ function ntk_decoder_wr(σi; nets = 8)
         data_tst = Flux.Data.DataLoader((Float32.(R_tst),x_tst'),
                         batchsize = 100,shuffle = false);
         data = [data_trn,data_tst]
-        mydec = Chain(Dense(Float32.(sqrt(0.001/Md)*randn(Md,N)),zeros(Float32,Md),relu),
+        mydec = Chain(Dense(Float32.(sqrt(1/Md)*randn(Md,N)),zeros(Float32,Md),relu),
             Dense(Md,1,identity))
         #Train decoder and computes ideal error
         dec, history = train_dnn_dec(data,dec=mydec,
             epochs=MaxEpochs,opt=ADAM,min_diff=1f-7)
-        @info ε
+        @info ε,n
         #Decoder output
         ε_id = mse_ideal(V_m,η,x_m,R_tst,x_tst')
         ntkD[:ε_id] = ε_id
@@ -61,7 +61,7 @@ function ntk_decoder_wr(σi; nets = 8)
     return ntkDicts
 end
 ##
-nets=4
+nets=1
 #Dataset parameters
 n_tst = Int.(1e5)
 γN = 100

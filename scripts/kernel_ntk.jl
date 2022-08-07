@@ -49,10 +49,10 @@ function ntk_decoder(N::Int,σi; nets = 8,rich=0)
     return ntkDicts
 end
 ##
-nets=8
+nets=2
 #Dataset parameters
 n_tst = Int.(1e5)
-γN = 200
+γN = 300
 #Network parameters
 #N = 100
 #σi = 30/500
@@ -64,11 +64,11 @@ bin = range(-0.5,0.5,length=M+1)
 x_m = bin[1:end-1] .+ diff(bin)/2
 ##
 
-σVec = (5:8:55)/500
+σVec = ((5:8:55)/500)[2:4]
 #NVec = 60:20:200
 #σi = 20/500
 NVec = 50:10:50
-ntkDec = Dict((σi,N) => ntk_decoder(N,σi) for σi = σVec,N=NVec)
+ntkDec = Dict((σi,N) => ntk_decoder(N,σi,nets=nets) for σi = σVec,N=NVec)
 ##
 Nmin,Nmax = first(NVec),last(NVec)
 name = savename("ntkErf_dec" , (@dict Nmin Nmax η γN),"jld2")
