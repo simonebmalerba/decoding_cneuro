@@ -6,10 +6,11 @@ using StatsBase,Distributions
 include(srcdir("plot_utils.jl"))
 ##
 #mydir= datadir("sims/linear_decoder")
-mydir= datadir("sims/ntk_decoder")
+#mydir= datadir("sims/ntk_decoder")
+mydir = datadir("sims/ntk_decodervsrich")
 flnames = filter(x ->occursin(r"ntkErf",x),
     readdir(mydir))
-myf = flnames[4]
+myf = flnames[10]
 data = load(datadir(mydir,myf))
 γ_e = split(myf,('_'))[findfirst(occursin.("γ",split(myf,'_')))] 
 γ = eval.(Meta.parse.(γ_e))
@@ -20,10 +21,10 @@ ntkDec = data["ntkDec"]
 η =0.1
 #γ = 20
 ##
-ε = [[ntkDec[(σi,N)]["$n"][:mse] for σi = σVec,N=NVec] for n=1:8]
+ε = [[ntkDec[(σi,N)]["$n"][:mse] for σi = σVec,N=NVec] for n=1:2]
 #lb = mean([[/(linDec[(σi,N)][n][:lb]...) for σi = σVec,N=NVec] for n=1:8])
-ε_id = [[ntkDec[(σi,N)]["$n"][:ε_id] for σi = σVec,N=NVec] for n=1:8]
-c1 = C(cgrad(:viridis),length(NVec)+2)
+ε_id = [[ntkDec[(σi,N)]["$n"][:ε_id] for σi = σVec,N=NVec] for n=1:2]
+c1 = C(cgrad(:viridis),length(NVec))
 #p1 = plot(size=(400,300))
 #yt = ([10^(-3.5) , 10^(-3), 10^(-2.5), 10^(-2) ],["0.0003","0.001","0.003","0.01"])
 p1 = plot(σVec,mean(ε),ribbon=std(ε), xlabel=L"$\sigma$",ylabel = L"$\varepsilon^2$",
@@ -67,3 +68,4 @@ plot!(p3,NVec,lbo',c=c2[5],label=L"$\gamma=20$")
 plot!(p3,NVec,mean(ε_id)[end,:])
 name = savename("e_optvsN_gamma2_20" , (@dict  η ),"svg")
 safesave(plotsdir("lin_dec",name) ,p3)
+##
