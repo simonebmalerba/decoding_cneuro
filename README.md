@@ -9,5 +9,4 @@ We test different methods to decode the value of the stimulus, x, from the noisy
 - ideal decoding method, or Bayesian posterior mean (utils.jl)
 - probabilistic decoder, trained with cross entropy loss to maximize the probability of the correct label (probabilistic_decoder.jl)
 - MLP with one hidden layer of size M (dnn_decoder.jl)
-- Neural Tangent Kernel: kernel machine corresponding to the infinite width regime of a MLP, trained in the lazy regime (large variance of the weights at initialization)
-- 
+- Neural Tangent Kernel: kernel machine corresponding to the infinite width regime of a MLP, trained in the lazy regime (large variance of the weights at initialization) (NTK)
