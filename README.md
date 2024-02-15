@@ -1,6 +1,6 @@
 # Decoding complex neural responses
 ## Introduction
-The project aims to analyze the ability of different decoding methods in extracting information from noisy neural responses.
+The project aims to analyze the ability of different machine learning decoding methods in extracting information from noisy neural responses.
 We use the model in Random Compressed Coding with Neurons, Blanco Malerba S, et al., bioRxiv 2022.01.06.475186; doi: https://doi.org/10.1101/2022.01.06.475186
 to generate neural responses: the mean response of a neuron, i, as a function of stimulus, x, is sampled from a Gaussian process with a Gaussian kernel of bandwidth $\sigma$, v_i(x).
 Neural responses are affected by i.i.d. Gaussian noise. 
